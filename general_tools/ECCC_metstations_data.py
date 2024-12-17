@@ -34,7 +34,7 @@ def canadian_stations(PATH, lon, lat, d=50):
 
     """
     from numpy import cos, arcsin, sqrt
-    df = pd.read_csv(PATH)
+    df = pd.read_csv(PATH+"climate-stations.csv")
     lats = df.y
     lons = df.x
     stsid = df.STN_ID
@@ -96,7 +96,7 @@ def get_met_data(years, months, stn_id):
     no_data = df.columns[df.isna().sum()==len(df)].to_list()
     no_data.extend(["Longitude (x)", "Latitude (y)", "Climate ID",
                     "Year", "Month", "Day"])
-    df = df.drop(columns=no_data).resample("1H").mean()
+    df = df.drop(columns=no_data).resample("1h").mean()
     df2 = df.resample("30min").mean().interpolate(method="time")
     df2 = df2.bfill(); df2 = df2.ffill() 
     return df, df2
