@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 
-def canadian_stations(PATH, lon, lat, d=50):
+def canadian_stations(lon, lat, d=50):
     """
     Returns the station IDs and names of the Canadian Meteorological stations
     close to the given coordinates. It will return all the stations in the given 
@@ -34,7 +34,7 @@ def canadian_stations(PATH, lon, lat, d=50):
 
     """
     from numpy import cos, arcsin, sqrt
-    df = pd.read_csv(PATH+"climate-stations.csv")
+    df = pd.read_csv("climate-stations.csv")
     lats = df.y
     lons = df.x
     stsid = df.STN_ID
