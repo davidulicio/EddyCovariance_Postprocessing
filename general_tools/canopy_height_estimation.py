@@ -8,7 +8,7 @@ import numpy as np
 
 def h_estimation(df, ustarmin=0.2, ustarmax=0.4, neutral=0.1):
     """
-    Dynamic canopy height calculat     ion based on Pennypacker, S., Baldocchi, D.
+    Dynamic canopy height estimation based on Pennypacker, S., Baldocchi, D.
     Seeing the Fields and Forests: Application of Surface-Layer Theory and
     Flux-Tower Data to Calculating Vegetation Canopy Height.
     Boundary-Layer Meteorol 158, 165–182 (2016).
