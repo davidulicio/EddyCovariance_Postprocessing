@@ -6,7 +6,7 @@ Canopy Height Estimation
 """
 import numpy as np
 
-def h_estimation(full_output, ustarmin=0.2, ustarmax=0.4, neutral=0.1):
+def h_estimation(df, ustarmin=0.2, ustarmax=0.4, neutral=0.1):
     """
     Dynamic canopy height calculat     ion based on Pennypacker, S., Baldocchi, D.
     Seeing the Fields and Forests: Application of Surface-Layer Theory and
@@ -16,13 +16,9 @@ def h_estimation(full_output, ustarmin=0.2, ustarmax=0.4, neutral=0.1):
 
     Parameters
     ----------
-    full_output : dataframe
-        EddyPro's full output file read as a dataframe.
-
-    Parameters
-    ----------
-    full_output : DataFrame
-        EddyPro's full output file as a dataframe.
+    df : DataFrame
+        EddyPro's full output file read as a dataframe or smartflux results from
+        Flux floder.
     ustarmin : float, optional
         Minimum ustar threshold. The default is 0.2.
     ustarmax : float, optional
@@ -39,11 +35,12 @@ def h_estimation(full_output, ustarmin=0.2, ustarmax=0.4, neutral=0.1):
 
     """
     #dynamic canopy height
-    umean = full_output.u_rot
-    vmean = full_output.v_rot
-    ustar = full_output["u*"]
+    df = df.astype(float, errors="ignore")
+    umean = df.u_rot
+    vmean = df.v_rot
+    ustar = df["u*"]
     u = np.sqrt(umean**(2) + vmean**(2))
-    sp = full_output["(z-d)/L"].abs()
+    sp = df["(z-d)/L"].abs()
     neutral_mask = sp <= neutral # Neutral conditions
     turbulence_mask = (ustar > ustarmin) * (ustar < ustarmax)
     mask = turbulence_mask * neutral_mask
