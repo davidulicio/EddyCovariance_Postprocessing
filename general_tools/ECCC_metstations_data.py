@@ -70,10 +70,10 @@ def get_met_data(years, months, stn_id):
 
     Returns
     -------
-    df : TYPE
-        DESCRIPTION.
-    df2 : TYPE
-        DESCRIPTION.
+    df : DataFrame
+        Raw data coming from ECCC with a 1-hour resolution.
+    df2 : DataFrame
+        Downscaled data to a 30-min frequency and interpolated values.
 
     """
     import requests
