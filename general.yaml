@@ -1,0 +1,13 @@
+General:
+  site_name: "Lac Saint-Pierre disturbed marsh."
+  siteID: UQAM_1
+  timezone: -5
+  lat: 46.1645
+  lon: -72.6850
+  distance: 50
+
+PATHS:
+  PATH_EP: "C:/Projects/UQAM/Sites/UQAM_1/EP_Output/20241125/eddypro_UQAM1_NOV_full_output_2024-11-28T060456_adv.csv"
+  PATH_BIOMET: "C:/Projects/UQAM/Sites/UQAM_1/Met/UQAM_1_Met_30m*"
+  PATH_NEAR_MET: "climate-stations.csv"
+  PATH_BIOMET_YAML: "biomet.yaml"
