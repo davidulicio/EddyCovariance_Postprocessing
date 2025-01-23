@@ -5,37 +5,143 @@ Data screening functions
 @author: David Trejo Cancino
 """
 import numpy as np
-import configparser
+import yaml
 import pandas as pd
 #%% Filtering data functions
 
-def biomet_physical_values(PATH, df):
-    import ast
-    # Read the biomet inifile
-    config = configparser.ConfigParser()
-    config.read(PATH)
-    sections = config.sections()
+def physical_range(yaml, df):
+    """
+    Filter extreme values using the limits defined in the YAML configuration file
+
+    Parameters
+    ----------
+    yaml : dict
+        Dictionary from the YAML configuration file.
+    df : DataFrame
+        DataFrame of the data to be filter.
+
+    Returns
+    -------
+    df2 : DataFrame
+        DataFrame with the data already filtered using the extreme limits.
+
+    """
+    # Read sections of the yaml file
+    sections = yaml.keys()
+    # filter data in a loop for every section and rename to Ameriflux format
     df2 = pd.DataFrame()
     for section in sections:
-        metadata = config[section]
-        inputvarname = metadata["inputfilename"]
-        variablename = metadata["variablename"]
+        metadata = yaml[section]
+        inputvarname = metadata["inputFileName"]
+        variablename = metadata["variableName"]
         try: 
-            var = df[inputvarname]
+            var = df[inputvarname].copy()
             # Read min and max values of the variable
-            minmax = np.float64(metadata["minmax"][1:-1].split(","))
+            minmax = np.float64(metadata["minMax"])
             # Create a boolean mask for values outside the interval
             mask = (var < minmax[0]) | (var > minmax[1])
             # Convert to nan data outside the limits
             # df[inputvarname][mask] = np.nan
             var[mask] = np.nan
             # Rename column to Ameriflux standard format
-            # df = df.rename(columns={inputvarname: variablename})
             df2[variablename] = var
         except KeyError:
             print("Variable " + inputvarname+" is not available in the dataset")
             pass
     return df2
+
+
+def dependencies_filtering(biomet_yaml, df):
+    """
+    Read the dependencies of a variable and propagate the dependencies' nan values
+    to the variable.
+
+    Parameters
+    ----------
+    biomet_yaml : dict
+        Dictionary from the YAML configuration file.
+    df : DataFrame
+        DataFrame of the data to be filtered.
+
+    Returns
+    -------
+    df3 : DataFrame
+        DataFrame of the data already filtered using the dependencies.
+
+    """
+    sections = biomet_yaml.keys()
+    df3 = df.copy(deep=True)
+    for section in sections:
+        metadata = biomet_yaml[section]
+        variablename = metadata["variableName"]
+        # try:
+        mask = np.zeros_like(df[variablename]) == 1 # Mask of Falses
+        try:
+            dep = biomet_yaml[variablename]["dependent"]
+            # In each loop the non valid data is propagated to the mask as Trues
+            try:
+                for dependency in dep:
+                    mask = mask + df[dependency].isna()
+                # If one of the dependencies is nan (due to lack of data or previous
+                # removal) then the nan values is propagated to the variable
+            except TypeError:
+                pass  # If the dependency feature does not have a variable, then it is omitted
+                
+            df3.loc[mask, variablename] = np.nan
+        except KeyError:
+            pass  # If the variable doesn't have the dependecies feature, it is skipped
+    return df3
+    
+    
+    
+    
+    # sections = biomet_yaml.keys()
+    # df2 = df.copy(deep=True)
+    # for section in sections:
+    #     metadata = biomet_yaml[section]
+    #     variablename = metadata["variableName"]
+    #     # try:
+    #     mask = np.zeros_like(df2[variablename]) == 1 # Mask of Falses
+    #     try:
+    #         dep = biomet_yaml[variablename]["dependent"]
+    #         # In each loop the non valid data is propagated to the mask as Trues
+    #         try:
+    #             for dependency in dep:
+    #                 mask = mask + df2[dependency].isna()
+    #                 print(dependency)
+    #             # If one of the dependencies is nan (due to lack of data or previous
+    #             # removal) then the nan values is propagated to the variable
+    #         except TypeError:
+    #             pass  # If the dependency feature does not have a variable, then it is omitted
+                
+    #         df2.loc[mask, variablename] = np.nan
+    #     except KeyError:
+    #         pass  # If the variable doesn't have the dependecies feature, it is skipped
+    #     return df2
+    
+    
+    
+    
+    # sections = biomet_yaml.keys()
+    # df2 = biomet2.copy()
+    # for section in sections:
+    #     metadata = biomet_yaml[section]
+    #     variablename = metadata["variableName"]
+    #     try:
+    #         dep = biomet_yaml[variablename]["dependent"]
+    #         mask = np.zeros_like(biomet2[variablename]) == 1 # Mask of Falses
+    #         try:
+    #             # In each loop the non valid data is propagated to the mask as Trues
+    #             for dependency in dep:
+    #                 mask = mask + biomet2[dependency].isna()
+    #         except TypeError:
+    #             pass  # If the variable doesn't have dependecies it is skipped
+    #         # If one of the dependencies is nan (due to lack of data or previous
+    #         # removal) then the nan values is propagated to the variable
+    #         df2.loc[mask, variablename] = np.nan
+    #     except KeyError:
+    #         pass # Skip variables that do not include the dependent feature
+
 
 
 def dependencies_qc(variable, min_val, max_val):
